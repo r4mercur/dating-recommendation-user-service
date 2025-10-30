@@ -1,0 +1,53 @@
+package com.bjarne.datingrecomandationsuserservice.rest;
+
+import com.bjarne.datingrecomandationsuserservice.dto.LoginRequest;
+import com.bjarne.datingrecomandationsuserservice.dto.UserSearchRequest;
+import com.bjarne.datingrecomandationsuserservice.entity.User;
+import com.bjarne.datingrecomandationsuserservice.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/user")
+public class UserResource {
+    private final UserService userService;
+
+    public UserResource(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public User getUser(@RequestParam(value = "referenceId") String referenceId) {
+        return userService.findByReferenceId(referenceId);
+    }
+
+    @PostMapping("/search")
+    public List<User> getUsersByReferenceIds(@Valid @RequestBody UserSearchRequest references) {
+        return userService.findByReferenceIds(references.referenceIds());
+    }
+
+    @PostMapping
+    public User createUser(@RequestBody User user, @RequestParam(value = "useDefaultPW", required = false) boolean defaultPW) {
+        if (defaultPW) {
+            user.setPassword("password");
+        }
+
+        return userService.save(user);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            User user = userService.authenticateUser(loginRequest.email(), loginRequest.password());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+
+}
