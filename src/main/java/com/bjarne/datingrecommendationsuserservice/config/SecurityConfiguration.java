@@ -1,4 +1,4 @@
-package com.bjarne.datingrecomandationsuserservice.config;
+package com.bjarne.datingrecommendationsuserservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

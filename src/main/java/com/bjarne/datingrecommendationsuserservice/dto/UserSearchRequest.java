@@ -1,4 +1,4 @@
-package com.bjarne.datingrecomandationsuserservice.dto;
+package com.bjarne.datingrecommendationsuserservice.dto;
 
 import java.util.List;
 

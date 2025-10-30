@@ -1,7 +1,7 @@
-package com.bjarne.datingrecomandationsuserservice.service;
+package com.bjarne.datingrecommendationsuserservice.service;
 
-import com.bjarne.datingrecomandationsuserservice.entity.User;
-import com.bjarne.datingrecomandationsuserservice.repository.UserRepository;
+import com.bjarne.datingrecommendationsuserservice.entity.User;
+import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.bjarne.datingrecomandationsuserservice.entity;
+package com.bjarne.datingrecommendationsuserservice.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

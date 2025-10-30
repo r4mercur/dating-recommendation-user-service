@@ -1,10 +1,10 @@
-package com.bjarne.datingrecomandationsuserservice;
+package com.bjarne.datingrecommendationsuserservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DatingRecomandationsUserServiceApplicationTests {
+class ApplicationTests {
 
     @Test
     void contextLoads() {

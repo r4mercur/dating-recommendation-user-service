@@ -1,9 +1,9 @@
-package com.bjarne.datingrecomandationsuserservice.rest;
+package com.bjarne.datingrecommendationsuserservice.rest;
 
-import com.bjarne.datingrecomandationsuserservice.dto.LoginRequest;
-import com.bjarne.datingrecomandationsuserservice.dto.UserSearchRequest;
-import com.bjarne.datingrecomandationsuserservice.entity.User;
-import com.bjarne.datingrecomandationsuserservice.service.UserService;
+import com.bjarne.datingrecommendationsuserservice.dto.LoginRequest;
+import com.bjarne.datingrecommendationsuserservice.dto.UserSearchRequest;
+import com.bjarne.datingrecommendationsuserservice.entity.User;
+import com.bjarne.datingrecommendationsuserservice.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

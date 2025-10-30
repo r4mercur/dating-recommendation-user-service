@@ -1,4 +1,4 @@
-package com.bjarne.datingrecomandationsuserservice.entity;
+package com.bjarne.datingrecommendationsuserservice.entity;
 
 public enum UserStatus {
     ACTIVE,

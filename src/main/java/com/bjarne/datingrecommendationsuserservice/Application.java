@@ -1,13 +1,13 @@
-package com.bjarne.datingrecomandationsuserservice;
+package com.bjarne.datingrecommendationsuserservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DatingRecomandationsUserServiceApplication {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(DatingRecomandationsUserServiceApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
 }

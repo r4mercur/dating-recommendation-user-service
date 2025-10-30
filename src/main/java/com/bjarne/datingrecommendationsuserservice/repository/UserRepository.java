@@ -1,6 +1,6 @@
-package com.bjarne.datingrecomandationsuserservice.repository;
+package com.bjarne.datingrecommendationsuserservice.repository;
 
-import com.bjarne.datingrecomandationsuserservice.entity.User;
+import com.bjarne.datingrecommendationsuserservice.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.bjarne'
 version = '0.0.1-SNAPSHOT'
-description = 'dating-recomandations-user-service'
+description = 'dating-recommendations-user-service'
 
 java {
     toolchain {
