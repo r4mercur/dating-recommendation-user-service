@@ -1,5 +1,6 @@
 package com.bjarne.datingrecommendationsuserservice.entity;
 
+import com.bjarne.datingrecommendationsuserservice.dto.UserRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,4 +35,15 @@ public class User {
     private UserStatus status;
 
     private String photo;
+
+    public User fromUserRequest(UserRequest userRequest, String password) {
+        this.name = userRequest.name();
+        this.email = userRequest.email();
+        this.password = password;
+        this.interests = userRequest.interests();
+        this.hobbies = userRequest.hobbies();
+        this.age = userRequest.age();
+        this.address = userRequest.address();
+        return this;
+    }
 }

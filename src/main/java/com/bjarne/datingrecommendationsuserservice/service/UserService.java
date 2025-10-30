@@ -1,5 +1,6 @@
 package com.bjarne.datingrecommendationsuserservice.service;
 
+import com.bjarne.datingrecommendationsuserservice.dto.UserRequest;
 import com.bjarne.datingrecommendationsuserservice.entity.User;
 import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +24,15 @@ public class UserService {
 
     public List<User> findByReferenceIds(List<String> references) {
         return userRepository.findAllByReferenceIdIn(references);
+    }
+
+    public User saveUserWithDTO(UserRequest userRequest) {
+        User tempUser = userRepository.findById(userRequest.id())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userRequest.id()));
+        String password = passwordEncoder.encode(userRequest.password());
+        User user = tempUser.fromUserRequest(userRequest, password);
+
+        return userRepository.save(user);
     }
 
     public User save(User user) {

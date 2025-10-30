@@ -1,6 +1,7 @@
 package com.bjarne.datingrecommendationsuserservice.rest;
 
 import com.bjarne.datingrecommendationsuserservice.dto.LoginRequest;
+import com.bjarne.datingrecommendationsuserservice.dto.UserRequest;
 import com.bjarne.datingrecommendationsuserservice.dto.UserSearchRequest;
 import com.bjarne.datingrecommendationsuserservice.entity.User;
 import com.bjarne.datingrecommendationsuserservice.service.UserService;
@@ -49,5 +50,8 @@ public class UserResource {
         }
     }
 
-
+    @PutMapping
+    public User updateUser(@Valid @RequestBody UserRequest userRequest) {
+        return userService.saveUserWithDTO(userRequest);
+    }
 }
