@@ -30,6 +30,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public void savePhoto(User user, String url) {
+        user.setPhoto(url);
+        userRepository.save(user);
+    }
+
     public User authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
