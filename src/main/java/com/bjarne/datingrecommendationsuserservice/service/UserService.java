@@ -2,9 +2,12 @@ package com.bjarne.datingrecommendationsuserservice.service;
 
 import com.bjarne.datingrecommendationsuserservice.dto.UserRequest;
 import com.bjarne.datingrecommendationsuserservice.entity.User;
+import com.bjarne.datingrecommendationsuserservice.entity.UserStatus;
 import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -12,10 +15,15 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RestTemplate restTemplate;
+    private final String recommendationServiceUrl;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RestTemplate restTemplate,
+                       @Value("${recommendation.service.url}") String recommendationServiceUrl) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.restTemplate = restTemplate;
+        this.recommendationServiceUrl = recommendationServiceUrl;
     }
 
     public User findByReferenceId(String referenceId) {
@@ -37,6 +45,11 @@ public class UserService {
 
     public User save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            // send request to recommendation service to create profile and store in elastic search
+            restTemplate.postForEntity(recommendationServiceUrl + "/import/user", user, String.class);
+        }
+
         return userRepository.save(user);
     }
 

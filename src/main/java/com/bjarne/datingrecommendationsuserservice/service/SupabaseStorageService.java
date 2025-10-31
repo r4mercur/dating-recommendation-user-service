@@ -16,10 +16,11 @@ public class SupabaseStorageService {
     private final String bucketName;
 
     public SupabaseStorageService(
+            RestTemplate restTemplate,
             @Value("${supabase.url}") String supabaseUrl,
             @Value("${supabase.service-key}")String supabaseServiceKey,
             @Value("${supabase.storage.bucket}") String bucketName) {
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
         this.supabaseUrl = supabaseUrl;
         this.supabaseServiceKey = supabaseServiceKey;
         this.bucketName = bucketName;
