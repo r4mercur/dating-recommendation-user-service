@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -45,9 +46,10 @@ public class UserService {
 
     public User save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setReferenceId(UUID.randomUUID().toString());
         if (user.getStatus() == UserStatus.ACTIVE) {
             // send request to recommendation service to create profile and store in elastic search
-            restTemplate.postForEntity(recommendationServiceUrl + "/import/user", user, String.class);
+            restTemplate.postForEntity(recommendationServiceUrl + "/users/import/user", user, String.class);
         }
 
         return userRepository.save(user);

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -44,6 +45,7 @@ public class User {
         this.hobbies = userRequest.hobbies();
         this.age = userRequest.age();
         this.address = userRequest.address();
+        this.referenceId = UUID.randomUUID().toString();
         return this;
     }
 }

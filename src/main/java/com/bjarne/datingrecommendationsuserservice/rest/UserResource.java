@@ -6,6 +6,7 @@ import com.bjarne.datingrecommendationsuserservice.dto.UserSearchRequest;
 import com.bjarne.datingrecommendationsuserservice.entity.User;
 import com.bjarne.datingrecommendationsuserservice.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class UserResource {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user, @RequestParam(value = "useDefaultPW", required = false) boolean defaultPW) {
+    public User createUser(@Valid @RequestBody User user, @RequestParam(value = "useDefaultPW", required = false) boolean defaultPW) {
         if (defaultPW) {
             user.setPassword("password");
         }
