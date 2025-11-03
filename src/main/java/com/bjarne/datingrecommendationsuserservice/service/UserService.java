@@ -44,10 +44,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User save(User user) {
+    public User save(User user, boolean addNotToSearchIndex) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setReferenceId(UUID.randomUUID().toString());
-        if (user.getStatus() == UserStatus.ACTIVE) {
+        if (user.getStatus() == UserStatus.ACTIVE && !addNotToSearchIndex) {
             // send request to recommendation service to create profile and store in elastic search
             restTemplate.postForEntity(recommendationServiceUrl + "/users/import/user", user, String.class);
         }
