@@ -1,13 +1,8 @@
 package com.bjarne.datingrecommendationsuserservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
@@ -15,6 +10,7 @@ import lombok.Setter;
 @Table(name = "contacts")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Contact {
 
 	@Id
@@ -29,6 +25,7 @@ public class Contact {
 	@JoinColumn(name = "contact_user_id")
 	private User contactUser;
 
+	@Enumerated(EnumType.STRING)
 	private ContactStatus status;
 
 	public Contact(User user, User contactUser, ContactStatus status) {

@@ -32,7 +32,9 @@ public class User {
 
     @Embedded
     private Address address;
+    @Enumerated(EnumType.STRING)
     private Gender gender;
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     private String photo;
