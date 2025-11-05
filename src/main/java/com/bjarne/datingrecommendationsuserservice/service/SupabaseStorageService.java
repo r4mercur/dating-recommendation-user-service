@@ -27,12 +27,13 @@ public class SupabaseStorageService {
     }
 
     public String upload(String bucket, String path, MultipartFile file) {
-        try {
-            if (bucket == null || bucket.isBlank()) {
-                bucket = bucketName;
+		try {
+			String supabaseImageBucket = bucket;
+			if (supabaseImageBucket == null || supabaseImageBucket.isBlank()) {
+                supabaseImageBucket = bucketName;
             }
 
-            String endpoint = String.format("%s/storage/v1/object/%s/%s", supabaseUrl, bucket, path);
+            String endpoint = String.format("%s/storage/v1/object/%s/%s", supabaseUrl, supabaseImageBucket, path);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + supabaseServiceKey);
@@ -48,7 +49,7 @@ public class SupabaseStorageService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                return String.format("%s/storage/v1/object/public/%s/%s", supabaseUrl, bucket, path);
+                return String.format("%s/storage/v1/object/public/%s/%s", supabaseUrl, supabaseImageBucket, path);
             } else {
                 throw new RuntimeException("Upload to supabase failed: " + response.getStatusCode());
             }

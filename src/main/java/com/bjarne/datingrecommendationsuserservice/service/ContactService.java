@@ -43,12 +43,12 @@ public class ContactService {
 
 		User user = userRepository.findByReferenceId(contactRequest.userReferenceId());
 		User contactUser = userRepository.findByReferenceId(contactRequest.contactReferenceId());
-		Contact contact;
 
 		if (user == null || contactUser == null) {
 			throw new IllegalArgumentException("User or contact user not found");
 		}
 
+		Contact contact;
 		if (contactRequest.status() == null) {
 			contact = new Contact(user, contactUser, ContactStatus.ACCEPTED);
 		} else {
