@@ -33,7 +33,7 @@ public class ContactService {
 		}
 
 		return contactRepository.findByUserId(user.getId()).stream()
-								.filter(contact -> contact.getStatus() == ContactStatus.ACCEPTED).toList();
+								.filter(contact -> contact.getStatus() != ContactStatus.BLOCKED).toList();
 	}
 
 	public Contact createContactFromContactRequest(ContactRequest contactRequest) {
