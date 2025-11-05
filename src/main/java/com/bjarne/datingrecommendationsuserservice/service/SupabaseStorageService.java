@@ -1,5 +1,6 @@
 package com.bjarne.datingrecommendationsuserservice.service;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -7,6 +8,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+
+import static org.springframework.http.MediaType.parseMediaType;
+
 
 @Service
 public class SupabaseStorageService {
@@ -27,6 +31,10 @@ public class SupabaseStorageService {
     }
 
     public String upload(String bucket, String path, MultipartFile file) {
+		if (file == null || file.isEmpty()) {
+			throw new IllegalArgumentException("File cannot be null or empty");
+		}
+
 		try {
 			String supabaseImageBucket = bucket;
 			if (supabaseImageBucket == null || supabaseImageBucket.isBlank()) {
@@ -37,7 +45,7 @@ public class SupabaseStorageService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + supabaseServiceKey);
-            headers.setContentType(MediaType.parseMediaType(file.getContentType() != null ? file.getContentType() : "application/octet-stream"));
+            headers.setContentType(parseMediaType(file.getContentType() != null ? file.getContentType() : "application/octet-stream"));
             headers.add("x-upsert", "true");
 
             HttpEntity<byte[]> entity = new HttpEntity<>(file.getBytes(), headers);
