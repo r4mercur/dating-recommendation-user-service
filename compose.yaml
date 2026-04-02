@@ -20,5 +20,10 @@ services:
     volumes:
       - minio_data:/data
 
+  solr:
+    image: 'solr:latest'
+    ports:
+      - '8983:8983'
+
 volumes:
   minio_data:

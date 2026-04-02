@@ -18,13 +18,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RestTemplate restTemplate;
     private final String recommendationServiceUrl;
+    private final boolean isRecommendationServiceEnabled;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RestTemplate restTemplate,
-                       @Value("${recommendation.service.url}") String recommendationServiceUrl) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       RestTemplate restTemplate,
+                       @Value("${recommendation.service.url}") String recommendationServiceUrl,
+                       @Value("${recommendation.service.enabled}") boolean isRecommendationServiceEnabled) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.restTemplate = restTemplate;
         this.recommendationServiceUrl = recommendationServiceUrl;
+        this.isRecommendationServiceEnabled = isRecommendationServiceEnabled;
     }
 
     public User findByReferenceId(String referenceId) {
@@ -51,7 +56,7 @@ public class UserService {
 			user.setReferenceId(UUID.randomUUID().toString());
 		}
 
-        if (user.getStatus() == UserStatus.ACTIVE && !addNotToSearchIndex) {
+        if (user.getStatus() == UserStatus.ACTIVE && !addNotToSearchIndex && isRecommendationServiceEnabled) {
             // send request to recommendation service to create profile and store in elastic search
             restTemplate.postForEntity(recommendationServiceUrl + "/users/import/user", user, String.class);
         }
