@@ -1,7 +1,7 @@
 package com.bjarne.datingrecommendationsuserservice.rest;
 
 import com.bjarne.datingrecommendationsuserservice.entity.User;
-import com.bjarne.datingrecommendationsuserservice.service.SupabaseStorageService;
+import com.bjarne.datingrecommendationsuserservice.service.ProfilePictureStorageService;
 import com.bjarne.datingrecommendationsuserservice.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +14,12 @@ import java.util.Map;
 @RequestMapping("/api/photos")
 public class PhotoResource {
 
-    private final SupabaseStorageService supabaseStorageService;
     private final UserService userService;
+    private final ProfilePictureStorageService profilePictureStorageService;
 
-    public PhotoResource(SupabaseStorageService supabaseStorageService, UserService userService) {
-        this.supabaseStorageService = supabaseStorageService;
+    public PhotoResource(UserService userService, ProfilePictureStorageService profilePictureStorageService) {
         this.userService = userService;
+        this.profilePictureStorageService = profilePictureStorageService;
     }
 
     @PostMapping(value = "/{referenceId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -32,20 +32,19 @@ public class PhotoResource {
             return ResponseEntity.notFound().build();
         }
 
-        String extension = getExtension(file.getOriginalFilename());
-        String objectUrl = "avatars/" + referenceId + (extension != null ? "." + extension : "");
-
-        // upload to supabase
-        String url = supabaseStorageService.upload(null, objectUrl, file);
+        String url = profilePictureStorageService.upload(user, file);
         userService.savePhoto(user, url);
 
         return ResponseEntity.ok(Map.of("url", url));
     }
 
-    private String getExtension(String filename) {
-        if (filename == null) return null;
-        int dot = filename.lastIndexOf('.');
-        if (dot < 0) return null;
-        return filename.substring(dot + 1);
+    @GetMapping("/{referenceId}")
+    public ResponseEntity<byte[]> getAvatar(@PathVariable String referenceId) {
+        User user = userService.findByReferenceId(referenceId);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.status(302).header("Location", user.getPhoto()).build();
     }
 }
