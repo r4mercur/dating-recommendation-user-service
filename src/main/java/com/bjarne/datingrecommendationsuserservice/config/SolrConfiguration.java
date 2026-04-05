@@ -6,6 +6,7 @@ import org.apache.solr.client.solrj.impl.HttpJdkSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
+import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.params.CoreAdminParams;
@@ -70,19 +71,19 @@ public class SolrConfiguration {
     }
 
     private void ensureCoreExists(SolrClient solrClient, String collectionName) throws SolrServerException, IOException {
-        CoreAdminRequest statusRequest = new CoreAdminRequest();
-        statusRequest.setAction(CoreAdminParams.CoreAdminAction.STATUS);
-        CoreAdminResponse statusResponse = statusRequest.process(solrClient);
+        CollectionAdminRequest.List listRequest = new CollectionAdminRequest.List();
+        CollectionAdminResponse listResponse = listRequest.process(solrClient);
+        @SuppressWarnings("unchecked")
+        List<String> collections = (List<String>) listResponse.getResponse().get("collections");
 
-        boolean coreExists = statusResponse.getCoreStatus(collectionName) != null;
-        if (!coreExists) {
+        boolean collectionExists = collections != null && collections.contains(collectionName);
+        if (!collectionExists) {
             CollectionAdminRequest.Create create =
                     CollectionAdminRequest.createCollection(collectionName, "_default", 1, 1);
             create.process(solrClient);
-
-            LOGGER.info("Created new core '{}'.", collectionName);
+            LOGGER.info("Created collection '{}'.", collectionName);
         } else {
-            LOGGER.info("Core '{}' already exists.", collectionName);
+            LOGGER.info("Collection '{}' already exists.", collectionName);
         }
     }
 

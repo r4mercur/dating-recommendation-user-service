@@ -17,9 +17,12 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/user/**").permitAll()
-                .requestMatchers("/api/contact/**").permitAll()
-                .requestMatchers("/api/photos/**").permitAll()
+                    .requestMatchers("/").permitAll()
+                    .requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers("/api/user/**").permitAll()
+                    .requestMatchers("/api/contact/**").permitAll()
+                    .requestMatchers("/api/photos/**").permitAll()
+                    .requestMatchers("/api/recommendations/**").permitAll()
                 .anyRequest().authenticated()
             )
             .csrf(AbstractHttpConfigurer::disable);
