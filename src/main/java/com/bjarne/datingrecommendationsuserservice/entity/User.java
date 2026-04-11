@@ -36,7 +36,7 @@ public class User {
     private Gender gender;
     @Enumerated(EnumType.STRING)
     private UserStatus status;
-
+    @Column(columnDefinition = "TEXT")
     private String photo;
 
     public User fromUserRequest(UserRequest userRequest, String password) {
