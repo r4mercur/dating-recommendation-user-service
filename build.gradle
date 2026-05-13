@@ -32,6 +32,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    implementation 'org.springframework.security:spring-security-oauth2-resource-server'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+
     implementation("io.minio:minio:9.0.0")
     implementation("org.apache.solr:solr-solrj:10.0.0")
     implementation("net.datafaker:datafaker:2.5.4")

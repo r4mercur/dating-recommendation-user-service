@@ -54,7 +54,7 @@ public class RecommendationService {
         query.addFilterQuery("-referenceId:" + ClientUtils.escapeQueryChars(referenceId));
 
         try {
-            QueryResponse response = solrClient.query(collectionName, query);
+            QueryResponse response = solrClient.query(query);
             List<String> recommendedIds = response.getResults().stream()
                     .map(doc -> (String) doc.getFieldValue("referenceId"))
                     .filter(Objects::nonNull)

@@ -1,0 +1,57 @@
+### Config (adjust as needed)
+@stsBase = http://localhost:8081
+@springBase = http://localhost:8080
+@clientId = service-a
+@clientSecret = super-secret
+@scope = service.read
+@audience = service-b
+
+### 0) STS OpenID configuration (must return 200)
+GET {{stsBase}}/.well-known/openid-configuration
+
+### 1) Request token from STS (client credentials)
+POST {{stsBase}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}&scope={{scope}}&audience={{audience}}
+
+> {%
+  client.log("/oauth/token status=" + response.status);
+  client.log("/oauth/token body=" + response.body);
+
+  const json = typeof response.body === "string"
+    ? (response.body ? JSON.parse(response.body) : {})
+    : (response.body || {});
+
+  if (!json.access_token) {
+    throw new Error("No access_token in STS response. Status=" + response.status);
+  }
+
+  const token = String(json.access_token);
+  client.global.set("auth_token", token);
+  client.log("Token saved. Length=" + token.length);
+%}
+
+### 2) API endpoint without token (should return 401)
+GET {{springBase}}/api/user/list
+
+### 3) Protected endpoint without token (should return 401)
+GET {{springBase}}/api/private/test
+
+### 4) Private endpoint with token (should return 200)
+GET {{springBase}}/api/private/test
+Authorization: Bearer {{auth_token}}
+
+### 5) Debug: log token + call private endpoint again
+GET {{springBase}}/api/private/test
+Authorization: Bearer {{auth_token}}
+
+> {%
+  client.log("auth_token set? " + !!client.global.get("auth_token"));
+  client.log("auth_token prefix: " + (client.global.get("auth_token") || "").slice(0, 24));
+  client.log("private status=" + response.status);
+  client.log("private body=" + response.body);
+%}
+
+### 6) STS JWKS (must return 200)
+GET {{stsBase}}/oauth/jwks.json
