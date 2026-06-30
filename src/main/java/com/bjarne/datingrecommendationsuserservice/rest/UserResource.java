@@ -1,13 +1,10 @@
 package com.bjarne.datingrecommendationsuserservice.rest;
 
-import com.bjarne.datingrecommendationsuserservice.dto.LoginRequest;
 import com.bjarne.datingrecommendationsuserservice.dto.UserRequest;
 import com.bjarne.datingrecommendationsuserservice.dto.UserSearchRequest;
 import com.bjarne.datingrecommendationsuserservice.entity.User;
 import com.bjarne.datingrecommendationsuserservice.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,16 +40,6 @@ public class UserResource {
 
 		return userService.save(user, addNotToSearchIndex.orElse(false));
 	}
-
-	@PostMapping("/login")
-    public ResponseEntity<User> login(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            User user = userService.authenticateUser(loginRequest.email(), loginRequest.password());
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException _) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody UserRequest userRequest) {

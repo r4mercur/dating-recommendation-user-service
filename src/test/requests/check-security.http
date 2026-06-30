@@ -1,30 +1,48 @@
 ### Config (adjust as needed)
-@stsBase = http://localhost:8081
 @springBase = http://localhost:8080
-@clientId = service-a
-@clientSecret = super-secret
-@scope = service.read
-@audience = service-b
+@email = security-test@example.com
+@password = password
 
-### 0) STS OpenID configuration (must return 200)
-GET {{stsBase}}/.well-known/openid-configuration
+### 0) Create a user for the local login flow
+POST {{springBase}}/api/user?useDefaultPW=true
+Content-Type: application/json
 
-### 1) Request token from STS (client credentials)
-POST {{stsBase}}/oauth/token
-Content-Type: application/x-www-form-urlencoded
+{
+  "name": "Security Test",
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "interests": ["music"],
+  "hobbies": ["running"],
+  "age": 29,
+  "address": {
+    "street": "Test Street 1",
+    "city": "Berlin",
+    "zipCode": "10115",
+    "country": "DE"
+  },
+  "gender": "DIVERSE",
+  "status": "ACTIVE"
+}
 
-grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}&scope={{scope}}&audience={{audience}}
+### 1) Login against the local auth endpoint
+POST {{springBase}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{email}}",
+  "password": "{{password}}",
+  "scope": "profile",
+  "audience": "general"
+}
 
 > {%
-  client.log("/oauth/token status=" + response.status);
-  client.log("/oauth/token body=" + response.body);
-
+  client.log("/api/auth/login status=" + response.status);
   const json = typeof response.body === "string"
     ? (response.body ? JSON.parse(response.body) : {})
     : (response.body || {});
 
   if (!json.access_token) {
-    throw new Error("No access_token in STS response. Status=" + response.status);
+    throw new Error("No access_token in login response. Status=" + response.status);
   }
 
   const token = String(json.access_token);
@@ -52,6 +70,3 @@ Authorization: Bearer {{auth_token}}
   client.log("private status=" + response.status);
   client.log("private body=" + response.body);
 %}
-
-### 6) STS JWKS (must return 200)
-GET {{stsBase}}/oauth/jwks.json
