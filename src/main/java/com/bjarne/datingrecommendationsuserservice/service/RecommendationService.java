@@ -9,7 +9,6 @@ import org.apache.solr.client.solrj.request.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,14 +22,11 @@ import java.util.stream.Stream;
 public class RecommendationService {
     private final SolrClient solrClient;
     private final UserRepository userRepository;
-    private final String collectionName;
 
     public RecommendationService(SolrClient solrClient,
-                                 UserRepository userRepository,
-                                 @Value("${recommender.solr.collection}") String collectionName) {
+                                 UserRepository userRepository) {
         this.solrClient = solrClient;
         this.userRepository = userRepository;
-        this.collectionName = collectionName;
     }
 
     public RecommendationResponse getRecommendations(String referenceId, int numberOfRecommendations) {

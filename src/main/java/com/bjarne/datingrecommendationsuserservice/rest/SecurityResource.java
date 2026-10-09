@@ -2,21 +2,20 @@ package com.bjarne.datingrecommendationsuserservice.rest;
 
 import com.bjarne.datingrecommendationsuserservice.dto.auth.LoginRequestDto;
 import com.bjarne.datingrecommendationsuserservice.dto.auth.TokenResponseDto;
-import com.bjarne.datingrecommendationsuserservice.service.AuthorizationBridgeService;
-import org.springframework.http.HttpStatus;
+import com.bjarne.datingrecommendationsuserservice.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class SecurityResource {
 
-    private final AuthorizationBridgeService authorizationBridgeService;
+    private final AuthService authService;
 
-    public SecurityResource(AuthorizationBridgeService authorizationBridgeService) {
-        this.authorizationBridgeService = authorizationBridgeService;
+    public SecurityResource(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping("/api/private/test")
@@ -25,11 +24,7 @@ public class SecurityResource {
     }
 
     @PostMapping("/api/auth/login")
-    public TokenResponseDto login(@RequestBody LoginRequestDto loginRequest) {
-        if (loginRequest.username() == null || loginRequest.username().isBlank() ||
-                loginRequest.password() == null || loginRequest.password().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username and password are required");
-        }
-        return authorizationBridgeService.login(loginRequest);
+    public TokenResponseDto login(@Valid @RequestBody LoginRequestDto loginRequest) {
+        return authService.login(loginRequest);
     }
 }

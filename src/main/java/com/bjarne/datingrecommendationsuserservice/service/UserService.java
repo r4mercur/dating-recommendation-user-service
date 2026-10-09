@@ -88,14 +88,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public User authenticateUser(String email, String password) {
-        User user = userRepository.findByEmail(email);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            return user;
-        }
-        return null;
-    }
-
     public Integer countUsers() {
         return Math.toIntExact(userRepository.count());
     }
