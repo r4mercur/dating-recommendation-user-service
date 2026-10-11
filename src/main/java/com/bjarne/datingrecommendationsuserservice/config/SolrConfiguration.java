@@ -32,12 +32,22 @@ public class SolrConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolrConfiguration.class);
 
+    /**
+     * HTTP/1.1 on purpose: with HTTP/2 over plain http the JDK client reuses connections that Solr's Jetty
+     * already closed after its idle timeout. The next update then fails with "RST_STREAM: Protocol error"
+     * (or hangs), so index events got lost whenever nothing had talked to Solr for a while.
+     */
     @Bean
     public SolrClient solrClient(@Value("${recommender.solr.url}") String solrUrl) {
-        return new HttpJdkSolrClient.Builder(solrUrl)
-                .withConnectionTimeout(10000, TimeUnit.MILLISECONDS)
+        return http11Client(solrUrl)
                 .withIdleTimeout(60000, TimeUnit.MILLISECONDS)
                 .build();
+    }
+
+    private static HttpJdkSolrClient.Builder http11Client(String url) {
+        return new HttpJdkSolrClient.Builder(url)
+                .useHttp1_1(true)
+                .withConnectionTimeout(10000, TimeUnit.MILLISECONDS);
     }
 
     @Bean
@@ -53,15 +63,11 @@ public class SolrConfiguration {
                 return;
             }
 
-            try (SolrClient adminClient = new HttpJdkSolrClient.Builder(baseUrl)
-                    .withConnectionTimeout(10000, TimeUnit.MILLISECONDS)
-                    .build()) {
+            try (SolrClient adminClient = http11Client(baseUrl).build()) {
                 ensureCoreExists(adminClient, collectionName);
             }
 
-            try (SolrClient collectionClient = new HttpJdkSolrClient.Builder(baseUrl + "/" + collectionName)
-                    .withConnectionTimeout(10000, TimeUnit.MILLISECONDS)
-                    .build()) {
+            try (SolrClient collectionClient = http11Client(baseUrl + "/" + collectionName).build()) {
                 ensureSchemaFields(collectionClient);
             }
 
@@ -95,6 +101,8 @@ public class SolrConfiguration {
                 .map(field -> field.get("name").toString())
                 .collect(Collectors.toSet());
 
+        // see SearchIndexService for the document. Fields are only added, never changed: a changed type needs a new collection.
+        // age, street and zipCode are no longer indexed (kept so existing collections stay valid).
         List<Map<String, Object>> desiredFields = List.of(
                 field("referenceId", "string", false),
                 field("name", "string", false),
@@ -105,7 +113,14 @@ public class SolrConfiguration {
                 field("city", "string", false),
                 field("street", "string", false),
                 field("country", "string", false),
-                field("zipCode", "string", false)
+                field("zipCode", "string", false),
+                field("status", "string", false),
+                field("birthDate", "pdate", false),
+                field("location", "location", false),
+                field("seekingGenders", "string", true),
+                field("minAge", "pint", false),
+                field("maxAge", "pint", false),
+                field("maxDistanceKm", "pint", false)
         );
 
         List<SchemaRequest.Update> updateList = new ArrayList<>();

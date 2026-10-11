@@ -4,24 +4,24 @@
 @password = password
 
 ### 0) Create a user for the local login flow
-POST {{springBase}}/api/user?useDefaultPW=true
+POST {{springBase}}/api/user
 Content-Type: application/json
 
 {
   "name": "Security Test",
   "email": "{{email}}",
   "password": "{{password}}",
+  "bio": "Just testing",
+  "birthDate": "1996-05-01",
   "interests": ["music"],
   "hobbies": ["running"],
-  "age": 29,
   "address": {
     "street": "Test Street 1",
     "city": "Berlin",
     "zipCode": "10115",
     "country": "DE"
   },
-  "gender": "DIVERSE",
-  "status": "ACTIVE"
+  "gender": "DIVERSE"
 }
 
 ### 1) Login against the local auth endpoint
@@ -50,8 +50,8 @@ Content-Type: application/json
   client.log("Token saved. Length=" + token.length);
 %}
 
-### 2) API endpoint without token (should return 401)
-GET {{springBase}}/api/user/list
+### 2) Own profile without token (should return 401)
+GET {{springBase}}/api/me
 
 ### 3) Protected endpoint without token (should return 401)
 GET {{springBase}}/api/private/test
@@ -70,3 +70,7 @@ Authorization: Bearer {{auth_token}}
   client.log("private status=" + response.status);
   client.log("private body=" + response.body);
 %}
+
+### 6) Own profile with token (referenceId comes from the JWT subject)
+GET {{springBase}}/api/me
+Authorization: Bearer {{auth_token}}

@@ -1,0 +1,29 @@
+# GeoNames postal codes for DE (https://www.geonames.org), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+# Reduced to: postal_code, place_name, state, latitude, longitude. Bulk-receiver entries (companies) removed.
+10115	Berlin	Berlin	52.5323	13.3846
+50667	Köln	Nordrhein-Westfalen	50.9387	6.9547
+80331	München	Bayern	48.1345	11.571
+04860	Dreiheide	Sachsen	51.5611	12.8889
+07580	Braunichswalde	Thüringen	50.8	12.2167
+14550	Krielow	Brandenburg	52.4166	12.8034
+18320	Dettmannsdorf	Mecklenburg-Vorpommern	54.1116	12.5287
+19300	Steesow	Mecklenburg-Vorpommern	53.1588	11.5441
+24220	Techelsdorf	Schleswig-Holstein	54.2167	10.05
+25560	Kaisborstel	Schleswig-Holstein	54.0137	9.4812
+30820	Heycom	Lower Saxony	52.4193	9.5738
+36320	Kirtorf	Hessen	50.7694	9.1039
+40670	Meerbusch	Nordrhein-Westfalen	51.2734	6.6484
+53520	Sierscheid	Rheinland-Pfalz	50.4571	6.9174
+54570	Salm	Rheinland-Pfalz	50.1529	6.6906
+56370	Allendorf	Rheinland-Pfalz	50.2678	7.9988
+57580	Elben	Rheinland-Pfalz	50.75	7.8333
+65830	Kriftel	Hessen	50.0841	8.4698
+72820	Sonnenbühl	Baden-Württemberg	48.3833	9.1833
+79400	Kandern	Baden-Württemberg	47.7139	7.6624
+86450	Altenmünster	Bayern	48.465	10.5906
+89250	Senden	Bayern	48.3244	10.0444
+92690	Pressath	Bayern	49.7686	11.9397
+97070	Würzburg	Bayern	49.7971	9.9337
+98660	Beinerstadt	Thüringen	50.4667	10.6
+99610	Großbrembach	Thüringen	51.1167	11.3167
+12529	Schönefeld	Brandenburg	52.389	13.5037

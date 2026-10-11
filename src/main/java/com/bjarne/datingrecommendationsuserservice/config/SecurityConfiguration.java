@@ -1,5 +1,10 @@
 package com.bjarne.datingrecommendationsuserservice.config;
 
+import com.bjarne.datingrecommendationsuserservice.entity.UserStatus;
+import com.bjarne.datingrecommendationsuserservice.security.AccountStatusFilter;
+import com.bjarne.datingrecommendationsuserservice.security.AccountStatusService;
+import com.bjarne.datingrecommendationsuserservice.presence.PresenceFilter;
+import com.bjarne.datingrecommendationsuserservice.presence.PresenceService;
 import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,14 +28,20 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+
+    private static final int MIN_JWT_SECRET_BYTES = 32;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,8 +49,14 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecretKey jwtSecretKey(@Value("${app.security.jwt.secret}") String secret) {
-        return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    public SecretKey jwtSecretKey(@Value("${app.security.jwt.secret:}") String secret) {
+        byte[] key = secret.getBytes(StandardCharsets.UTF_8);
+        if (key.length < MIN_JWT_SECRET_BYTES) {
+            throw new IllegalStateException("app.security.jwt.secret is " + (secret.isBlank() ? "not set" : "too short")
+                    + ": set the environment variable JWT_SECRET to at least " + MIN_JWT_SECRET_BYTES
+                    + " bytes (HS256), or start with the dev profile");
+        }
+        return new SecretKeySpec(key, "HmacSHA256");
     }
 
     @Bean
@@ -57,27 +74,39 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    /**
+     * Authorities from the token: SCOPE_* from "scope" (chosen by the client, so never used for permissions)
+     * and ROLE_* from "roles" (set from the database at login, e.g. ROLE_ADMIN).
+     */
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter scopes = new JwtGrantedAuthoritiesConverter();
+        scopes.setAuthoritiesClaimName("scope");
+        scopes.setAuthorityPrefix("SCOPE_");
+        JwtGrantedAuthoritiesConverter roles = new JwtGrantedAuthoritiesConverter();
+        roles.setAuthoritiesClaimName("roles");
+        roles.setAuthorityPrefix("ROLE_");
+
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        authoritiesConverter.setAuthoritiesClaimName("scope");
-        authoritiesConverter.setAuthorityPrefix("SCOPE_");
-        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            List<GrantedAuthority> authorities = new ArrayList<>(scopes.convert(jwt));
+            authorities.addAll(roles.convert(jwt));
+            return authorities;
+        });
         return converter;
     }
 
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> {
-            com.bjarne.datingrecommendationsuserservice.entity.User user = userRepository.findByEmail(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("User not found: " + username);
-            }
+            com.bjarne.datingrecommendationsuserservice.entity.User user = userRepository.findByEmailIgnoreCase(username.trim())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
             return User
                     .withUsername(user.getEmail())
                     .password(user.getPassword())
-                    .authorities("USER")
+                    .authorities("ROLE_" + user.getRole().name())
+                    .accountLocked(user.getStatus() == UserStatus.BLOCKED)
+                    .disabled(user.getStatus() == UserStatus.MARKED_FOR_DELETION)
                     .build();
         };
     }
@@ -92,16 +121,24 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            JwtDecoder jwtDecoder,
-                                           JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+                                           JwtAuthenticationConverter jwtAuthenticationConverter,
+                                           AccountStatusService accountStatusService,
+                                           PresenceService presenceService) throws Exception {
         http
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/").permitAll()
+                    .requestMatchers("/", "/error").permitAll()
+                    // WebSocket handshake; STOMP sessions authenticate with the JWT in the CONNECT frame
+                    .requestMatchers("/ws", "/ws/**").permitAll()
                     .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
-                    .requestMatchers("/api/auth/login").permitAll()
+                    // only reachable when springdoc is enabled (dev profile)
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
+                    .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/tags").permitAll()
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .requestMatchers("/api/**").authenticated()
                     .anyRequest().authenticated()
             )
@@ -109,7 +146,11 @@ public class SecurityConfiguration {
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
                 jwtConfigurer.decoder(jwtDecoder)
                     .jwtAuthenticationConverter(jwtAuthenticationConverter)
-            ));
+            ))
+            // a valid token of a meanwhile blocked or deleted account is rejected
+            .addFilterAfter(new AccountStatusFilter(accountStatusService), BearerTokenAuthenticationFilter.class)
+            // every authenticated request keeps the user online
+            .addFilterAfter(new PresenceFilter(presenceService), AccountStatusFilter.class);
 
         return http.build();
     }

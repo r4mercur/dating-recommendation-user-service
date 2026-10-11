@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # matches the Gradle toolchain in build.gradle
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 24
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # integration tests start Postgres, Kafka, Solr and SeaweedFS via Testcontainers (Docker is available on the runner);
+      # the gitignored postal code data is not needed, tests use src/test/resources/geo-test
+      - name: Run tests
+        run: ./gradlew test --console=plain
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/tests/test
