@@ -6,14 +6,10 @@ import com.bjarne.datingrecommendationsuserservice.entity.User;
 import com.bjarne.datingrecommendationsuserservice.games.UserGame;
 import com.bjarne.datingrecommendationsuserservice.games.UserGameRepository;
 import com.bjarne.datingrecommendationsuserservice.games.dto.GameResult;
+import com.bjarne.datingrecommendationsuserservice.interaction.*;
 import com.bjarne.datingrecommendationsuserservice.music.UserSong;
 import com.bjarne.datingrecommendationsuserservice.music.UserSongRepository;
 import com.bjarne.datingrecommendationsuserservice.music.dto.TrackResult;
-import com.bjarne.datingrecommendationsuserservice.interaction.BlockRepository;
-import com.bjarne.datingrecommendationsuserservice.interaction.MatchRepository;
-import com.bjarne.datingrecommendationsuserservice.interaction.Reaction;
-import com.bjarne.datingrecommendationsuserservice.interaction.ReactionRepository;
-import com.bjarne.datingrecommendationsuserservice.interaction.ReactionType;
 import com.bjarne.datingrecommendationsuserservice.repository.PostalCodeRepository;
 import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
 import com.bjarne.datingrecommendationsuserservice.service.GeocodingService;
@@ -193,6 +189,34 @@ class E2eDataSeedIntegrationTest {
     void blockedUserCannotLogIn() throws Exception {
         login(E2eUsers.BLOCKED.email(), E2eUsers.PASSWORD).andExpect(status().isUnauthorized());
         login(E2eUsers.BOB.email(), E2eUsers.PASSWORD).andExpect(status().isOk());
+    }
+
+    @Test
+    void allFakeUsersCanSeeEachOther() {
+        List<User> users = new DevDataSeedRunner(userService, tagService, postalCodeRepository, true).generateUsers();
+
+        assertThat(users).hasSizeGreaterThan(1);
+        // the recommendation filters apply in both directions: gender, age and distance
+        for (User a : users) {
+            for (User b : users) {
+                if (a == b) {
+                    continue;
+                }
+                assertThat(a.getPreferences().getSeekingGenders()).as("%s seeks %s", a.getName(), b.getGender()).contains(b.getGender());
+                assertThat(b.getAge()).as("age of %s for %s", b.getName(), a.getName())
+                        .isBetween(a.getPreferences().getMinAge(), a.getPreferences().getMaxAge());
+                assertThat(distanceKm(a, b)).as("distance %s - %s", a.getName(), b.getName())
+                        .isLessThanOrEqualTo(Math.min(a.getPreferences().getMaxDistanceKm(), b.getPreferences().getMaxDistanceKm()));
+            }
+        }
+    }
+
+    private static double distanceKm(User a, User b) {
+        double dLat = Math.toRadians(b.getLatitude() - a.getLatitude());
+        double dLon = Math.toRadians(b.getLongitude() - a.getLongitude());
+        double h = Math.pow(Math.sin(dLat / 2), 2)
+                + Math.cos(Math.toRadians(a.getLatitude())) * Math.cos(Math.toRadians(b.getLatitude())) * Math.pow(Math.sin(dLon / 2), 2);
+        return 2 * 6371.0 * Math.asin(Math.sqrt(h));
     }
 
     @Test

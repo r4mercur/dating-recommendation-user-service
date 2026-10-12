@@ -1,14 +1,7 @@
 package com.bjarne.datingrecommendationsuserservice.config.dev;
 
 import com.bjarne.datingrecommendationsuserservice.config.e2e.E2eUsers;
-import com.bjarne.datingrecommendationsuserservice.entity.Address;
-import com.bjarne.datingrecommendationsuserservice.entity.Gender;
-import com.bjarne.datingrecommendationsuserservice.entity.PostalCode;
-import com.bjarne.datingrecommendationsuserservice.entity.SearchPreferences;
-import com.bjarne.datingrecommendationsuserservice.entity.Tag;
-import com.bjarne.datingrecommendationsuserservice.entity.TagCategory;
-import com.bjarne.datingrecommendationsuserservice.entity.User;
-import com.bjarne.datingrecommendationsuserservice.entity.UserStatus;
+import com.bjarne.datingrecommendationsuserservice.entity.*;
 import com.bjarne.datingrecommendationsuserservice.repository.PostalCodeRepository;
 import com.bjarne.datingrecommendationsuserservice.service.TagService;
 import com.bjarne.datingrecommendationsuserservice.service.UserService;
@@ -28,6 +21,10 @@ import java.util.*;
  * Seeds 100 fake users into an empty database. All random values come from one seeded {@link Random},
  * so every freshly created database contains the same users. Tags and the city reserved for the E2E users
  * are never used, so the fake users cannot push bob and carol out of alice' recommendations.
+ * <p>
+ * All fake users can see each other: they seek every gender, from 18 to 99 years, within {@value #MAX_DISTANCE_KM} km
+ * (more than the distance across Germany). Random preferences made almost nobody visible to anybody,
+ * because the filters apply in both directions.
  */
 @Component
 @Profile("dev")
@@ -36,6 +33,8 @@ public class DevDataSeedRunner implements ApplicationRunner {
 
     private static final int USER_COUNT = 100;
     private static final long SEED = 42;
+    /** Larger than any distance between two places in Germany, so the distance filter never excludes a fake user. */
+    private static final int MAX_DISTANCE_KM = 1000;
     /** Fixed reference date instead of "today", so birth dates do not depend on the day of seeding. */
     private static final LocalDate OLDEST_BIRTH_DATE = LocalDate.of(1980, 1, 1);
 
@@ -104,12 +103,9 @@ public class DevDataSeedRunner implements ApplicationRunner {
         user.setLatitude(place.getLatitude());
         user.setLongitude(place.getLongitude());
 
+        // defaults: all genders, 18-99 years; only the distance is widened
         SearchPreferences preferences = SearchPreferences.defaults();
-        int minAge = random.nextInt(18, 35);
-        preferences.setMinAge(minAge);
-        preferences.setMaxAge(minAge + random.nextInt(5, 20));
-        preferences.setMaxDistanceKm(random.nextInt(10, 201));
-        preferences.setSeekingGenders(new HashSet<>(Set.of(randomGender())));
+        preferences.setMaxDistanceKm(MAX_DISTANCE_KM);
         user.setPreferences(preferences);
 
         return user;
