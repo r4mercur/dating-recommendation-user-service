@@ -44,7 +44,7 @@ public class RateLimiter {
         }
 
         Window window = windows
-                .computeIfAbsent(limitName, _ -> Caffeine.newBuilder().expireAfterWrite(limit.window()).<String, Window>build())
+                .computeIfAbsent(limitName, _ -> Caffeine.newBuilder().expireAfterWrite(limit.window()).build())
                 .get(key, _ -> new Window(System.nanoTime()));
 
         long retryAfterNanos = window.tryAcquire(limit);

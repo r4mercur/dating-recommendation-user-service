@@ -1,5 +1,6 @@
 package com.bjarne.datingrecommendationsuserservice.security;
 
+import com.bjarne.datingrecommendationsuserservice.entity.User;
 import com.bjarne.datingrecommendationsuserservice.entity.UserStatus;
 import com.bjarne.datingrecommendationsuserservice.event.UserStatusChangedEvent;
 import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
@@ -38,8 +39,8 @@ public class AccountStatusService {
      */
     public boolean mayUseApi(String referenceId) {
         Optional<UserStatus> status = statuses.get(referenceId,
-                id -> userRepository.findByReferenceId(id).map(user -> user.getStatus()));
-        return status.isPresent() && !LOCKED_OUT.contains(status.get());
+                id -> userRepository.findByReferenceId(id).map(User::getStatus));
+        return status.isEmpty() || LOCKED_OUT.contains(status.get());
     }
 
     @EventListener

@@ -31,7 +31,7 @@ public class AccountStatusFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain chain) throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof JwtAuthenticationToken jwt && !accountStatusService.mayUseApi(jwt.getName())) {
+        if (authentication instanceof JwtAuthenticationToken jwt && accountStatusService.mayUseApi(jwt.getName())) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);

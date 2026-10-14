@@ -1,11 +1,11 @@
 package com.bjarne.datingrecommendationsuserservice.config;
 
 import com.bjarne.datingrecommendationsuserservice.entity.UserStatus;
-import com.bjarne.datingrecommendationsuserservice.security.AccountStatusFilter;
-import com.bjarne.datingrecommendationsuserservice.security.AccountStatusService;
 import com.bjarne.datingrecommendationsuserservice.presence.PresenceFilter;
 import com.bjarne.datingrecommendationsuserservice.presence.PresenceService;
 import com.bjarne.datingrecommendationsuserservice.repository.UserRepository;
+import com.bjarne.datingrecommendationsuserservice.security.AccountStatusFilter;
+import com.bjarne.datingrecommendationsuserservice.security.AccountStatusService;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,9 +28,8 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -73,11 +73,11 @@ public class SecurityConfiguration {
         return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecretKey));
     }
 
-    @Bean
     /**
      * Authorities from the token: SCOPE_* from "scope" (chosen by the client, so never used for permissions)
      * and ROLE_* from "roles" (set from the database at login, e.g. ROLE_ADMIN).
      */
+    @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter scopes = new JwtGrantedAuthoritiesConverter();
         scopes.setAuthoritiesClaimName("scope");
@@ -123,7 +123,7 @@ public class SecurityConfiguration {
                                            JwtDecoder jwtDecoder,
                                            JwtAuthenticationConverter jwtAuthenticationConverter,
                                            AccountStatusService accountStatusService,
-                                           PresenceService presenceService) throws Exception {
+                                           PresenceService presenceService) {
         http
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .httpBasic(AbstractHttpConfigurer::disable)

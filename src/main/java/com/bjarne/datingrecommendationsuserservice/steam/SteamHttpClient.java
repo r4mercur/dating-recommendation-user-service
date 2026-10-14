@@ -14,7 +14,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -77,7 +76,6 @@ public class SteamHttpClient implements SteamClient {
                 .filter(game -> game != null && game.appid() != null)
                 .map(game -> new SteamGame(game.appid(), game.name() == null ? "App " + game.appid() : game.name(),
                         game.playtimeForever() == null ? 0 : game.playtimeForever()))
-                .filter(Objects::nonNull)
                 .toList();
         return Optional.of(games);
     }

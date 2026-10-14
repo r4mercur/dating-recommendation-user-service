@@ -1,7 +1,7 @@
 package com.bjarne.datingrecommendationsuserservice.chat;
 
-import org.jspecify.annotations.NonNull;
 import com.bjarne.datingrecommendationsuserservice.security.AccountStatusService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
@@ -61,7 +61,7 @@ public class StompAuthenticationInterceptor implements ChannelInterceptor {
         }
         try {
             var authentication = jwtAuthenticationConverter.convert(jwtDecoder.decode(header.substring(BEARER.length())));
-            if (!accountStatusService.mayUseApi(authentication.getName())) {
+            if (accountStatusService.mayUseApi(authentication.getName())) {
                 throw new MessageDeliveryException("Account is blocked or deleted");
             }
             return authentication;

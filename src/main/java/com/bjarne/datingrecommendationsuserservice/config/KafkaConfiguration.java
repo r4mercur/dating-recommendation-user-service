@@ -1,10 +1,6 @@
 package com.bjarne.datingrecommendationsuserservice.config;
 
-import com.bjarne.datingrecommendationsuserservice.messaging.ChatEventProducer;
-import com.bjarne.datingrecommendationsuserservice.messaging.InteractionEventProducer;
-import com.bjarne.datingrecommendationsuserservice.messaging.NotificationEventProducer;
-import com.bjarne.datingrecommendationsuserservice.messaging.UserProfileUpdatedProducer;
-import com.bjarne.datingrecommendationsuserservice.messaging.UserStatusChangedProducer;
+import com.bjarne.datingrecommendationsuserservice.messaging.*;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +42,7 @@ public class KafkaConfiguration {
     @Bean
     public DefaultErrorHandler kafkaErrorHandler(KafkaOperations<Object, Object> kafkaOperations) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaOperations,
-                (record, exception) -> new TopicPartition(record.topic() + DEAD_LETTER_SUFFIX, -1));
+                (record, _) -> new TopicPartition(record.topic() + DEAD_LETTER_SUFFIX, -1));
 
         ExponentialBackOffWithMaxRetries backOff = new ExponentialBackOffWithMaxRetries(5);
         backOff.setInitialInterval(500);

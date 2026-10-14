@@ -1,16 +1,7 @@
 package com.bjarne.datingrecommendationsuserservice.service;
 
-import com.bjarne.datingrecommendationsuserservice.dto.AddressDto;
-import com.bjarne.datingrecommendationsuserservice.dto.ChangePasswordRequest;
-import com.bjarne.datingrecommendationsuserservice.dto.RegistrationRequest;
-import com.bjarne.datingrecommendationsuserservice.dto.SearchPreferencesDto;
-import com.bjarne.datingrecommendationsuserservice.dto.UpdateProfileRequest;
-import com.bjarne.datingrecommendationsuserservice.entity.Address;
-import com.bjarne.datingrecommendationsuserservice.entity.Role;
-import com.bjarne.datingrecommendationsuserservice.entity.SearchPreferences;
-import com.bjarne.datingrecommendationsuserservice.entity.TagCategory;
-import com.bjarne.datingrecommendationsuserservice.entity.User;
-import com.bjarne.datingrecommendationsuserservice.entity.UserStatus;
+import com.bjarne.datingrecommendationsuserservice.dto.*;
+import com.bjarne.datingrecommendationsuserservice.entity.*;
 import com.bjarne.datingrecommendationsuserservice.event.UserProfileUpdatedEvent;
 import com.bjarne.datingrecommendationsuserservice.event.UserStatusChangedEvent;
 import com.bjarne.datingrecommendationsuserservice.exception.BadRequestException;
@@ -158,7 +149,7 @@ public class UserService {
      * Addresses that cannot be located are logged and skipped.
      */
     @Transactional
-    public int backfillMissingCoordinates() {
+    public void backfillMissingCoordinates() {
         int located = 0;
         for (User user : userRepository.findAllByLatitudeIsNullAndAddressZipCodeIsNotNull()) {
             try {
@@ -177,7 +168,6 @@ public class UserService {
         if (located > 0) {
             LOGGER.info("Added coordinates to {} users.", located);
         }
-        return located;
     }
 
     @Transactional

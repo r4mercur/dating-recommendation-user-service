@@ -83,7 +83,7 @@ public class RefreshTokenService {
             throw new InvalidRefreshTokenException();
         }
         User user = token.getUser();
-        if (!accountStatusService.mayUseApi(user.getReferenceId())) {
+        if (accountStatusService.mayUseApi(user.getReferenceId())) {
             refreshTokenRepository.revokeFamily(token.getFamilyId(), now);
             throw new InvalidRefreshTokenException();
         }
